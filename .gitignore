@@ -7,9 +7,17 @@ wheels/
 *.egg-info
 
 # Virtual environments
-.venv
+.venv/
 venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
 
-# Rasa
-rasa/.rasa/
-rasa/models/
+# Environment variables
+.env
+
+# Data
+data/raw/
+data/processed/
+data/chroma_db/
