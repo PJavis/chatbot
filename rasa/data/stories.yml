@@ -1,0 +1,61 @@
+version: "3.1"
+
+stories:
+
+- story: greet and ask information
+  steps:
+    - intent: greet
+    - action: utter_greet
+    - intent: ask_information
+    - action: utter_searching
+    - action: action_rag_search
+    - intent: goodbye
+    - action: utter_goodbye
+
+- story: ask technical question
+  steps:
+    - intent: ask_technical
+    - action: utter_searching
+    - action: action_rag_search
+
+- story: ask faq
+  steps:
+    - intent: ask_faq
+    - action: utter_searching
+    - action: action_rag_search
+
+- story: multi-turn information query
+  steps:
+    - intent: greet
+    - action: utter_greet
+    - intent: ask_information
+    - action: utter_searching
+    - action: action_rag_search
+    - intent: ask_information
+    - action: utter_searching
+    - action: action_rag_search
+    - intent: affirm
+    - action: utter_affirm
+    - intent: goodbye
+    - action: utter_goodbye
+
+- story: out of scope handling
+  steps:
+    - intent: out_of_scope
+    - action: utter_out_of_scope
+
+- story: human handoff
+  steps:
+    - intent: ask_human_handoff
+    - action: action_human_handoff
+
+- story: technical then FAQ
+  steps:
+    - intent: greet
+    - action: utter_greet
+    - intent: ask_technical
+    - action: utter_searching
+    - action: action_rag_search
+    - intent: ask_faq
+    - action: utter_searching
+    - action: action_rag_search

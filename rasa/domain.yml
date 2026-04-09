@@ -1,0 +1,68 @@
+version: "3.1"
+
+intents:
+  - greet
+  - goodbye
+  - ask_information        # Hỏi thông tin chung → gọi RAG
+  - ask_technical          # Hỏi kỹ thuật → gọi RAG
+  - ask_faq                # FAQ nội bộ → gọi RAG
+  - affirm
+  - deny
+  - out_of_scope
+  - ask_human_handoff
+
+entities:
+  - topic
+  - product
+  - error_code
+
+slots:
+  user_query:
+    type: text
+    mappings:
+      - type: custom
+  rag_answer:
+    type: text
+    mappings:
+      - type: custom
+  conversation_context:
+    type: text
+    mappings:
+      - type: custom
+
+responses:
+  utter_greet:
+    - text: "Xin chào! Tôi là trợ lý hỗ trợ nội bộ. Tôi có thể giúp bạn tìm kiếm thông tin trong tài liệu và FAQ. Bạn cần hỗ trợ gì?"
+
+  utter_goodbye:
+    - text: "Tạm biệt! Chúc bạn làm việc hiệu quả."
+
+  utter_affirm:
+    - text: "Tuyệt! Bạn còn muốn hỏi thêm gì không?"
+
+  utter_out_of_scope:
+    - text: "Xin lỗi, câu hỏi này nằm ngoài phạm vi kiến thức của tôi. Tôi chỉ có thể hỗ trợ các vấn đề liên quan đến tài liệu nội bộ."
+
+  utter_searching:
+    - text: "Đang tìm kiếm thông tin cho bạn..."
+
+  utter_no_result:
+    - text: "Tôi không tìm thấy thông tin liên quan trong tài liệu. Bạn có thể thử đặt câu hỏi theo cách khác hoặc liên hệ nhóm hỗ trợ."
+
+  utter_ask_rephrase:
+    - text: "Bạn có thể nói rõ hơn về điều bạn muốn biết không?"
+
+  utter_human_handoff:
+    - text: "Tôi sẽ kết nối bạn với nhân viên hỗ trợ. Vui lòng chờ trong giây lát."
+
+  utter_error:
+    - text: "Xin lỗi, có lỗi xảy ra khi xử lý câu hỏi của bạn. Vui lòng thử lại sau."
+
+actions:
+  - action_rag_search
+  - action_set_context
+  - action_human_handoff
+
+session_config:
+  session_expiration_time: 60   # minutes
+  carry_over_slots_to_new_session: false

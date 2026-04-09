@@ -8,3 +8,8 @@ wheels/
 
 # Virtual environments
 .venv
+venv/
+
+# Rasa
+rasa/.rasa/
+rasa/models/
