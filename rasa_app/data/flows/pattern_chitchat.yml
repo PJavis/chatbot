@@ -1,0 +1,6 @@
+flows:
+  pattern_chitchat:
+    description: handle interactions with the user that are not task-oriented
+    name: pattern chitchat
+    steps:
+      - action: utter_free_chitchat_response

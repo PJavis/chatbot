@@ -1,0 +1,19 @@
+version: "3.1"
+
+rules:
+  - rule: respond to greetings
+    steps:
+      - intent: greet
+      - action: utter_free_chitchat_response
+  - rule: describe assistant capabilities
+    steps:
+      - intent: ask_help
+      - action: utter_help_overview
+  - rule: handle gratitude
+    steps:
+      - intent: thanks
+      - action: utter_free_chitchat_response
+  - rule: say goodbye
+    steps:
+      - intent: goodbye
+      - action: utter_free_chitchat_response

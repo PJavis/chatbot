@@ -1,0 +1,12 @@
+recipe: default.v1
+assistant_id: sharp-gulf
+language: en
+pipeline:
+- name: CompactLLMCommandGenerator
+  llm:
+    model_group: openrouter-gemma
+  flow_retrieval:
+    embeddings:
+      model_group: openrouter-embeddings
+policies:
+- name: FlowPolicy
