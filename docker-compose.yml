@@ -8,15 +8,19 @@ services:
       - "5005:5005"
     env_file:
       - ./rasa_app/.env
+    environment:
+      - RASA_DATA_SOURCE=/data/processed
+      - RASA_KB_DIR=/app/docs
     restart: unless-stopped
     volumes:
       - ./rasa_app/models:/app/models
       - ./rasa_app:/app
+      - ./data:/data:ro
 
   ui:
     build:
-      context: ./ui
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ui/Dockerfile
     image: chatbot-ui
     ports:
       - "7860:7860"
@@ -27,5 +31,7 @@ services:
       - RASA_REST_URL=http://rasa:5005/webhooks/rest/webhook
       - RASA_CHAT_SENDER=gradio_user
       - UI_PORT=7860
+      - RASA_DATA_SOURCE=/data/processed
+      - RASA_KB_DIR=/app/docs
     volumes:
-      - ./ui:/app
+      - ./data:/app/data:ro

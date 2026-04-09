@@ -7,18 +7,21 @@ Usage:
 Định dạng file predictions.json:
     {"example_id": "predicted_answer_text", ...}
 
-Nếu không có predictions, script sẽ tạo một baseline dummy để demo.
+Nếu không có predictions, script sẽ dùng Rasa knowledge base theo mặc định,
+hoặc baseline dummy khi chọn `--source oracle`.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import random
 from pathlib import Path
 
 from data import load_split
 from evaluation.metrics import evaluate_predictions
+from rasa_inference import generate_rasa_predictions
 
 
 # ---------------------------------------------------------------------------
@@ -93,14 +96,41 @@ def evaluate(
     return metrics
 
 
+def evaluate_with_rasa(
+    examples: list[dict],
+    predictions: dict[str, str] | None = None,
+    retrieved_ids_map: dict[str, list[str]] | None = None,
+    output_path: Path | None = None,
+    rasa_url: str | None = None,
+    sender: str | None = None,
+    timeout: float | None = None,
+) -> dict:
+    """Run evaluation using Rasa responses if predictions are not provided."""
+    if predictions is None:
+        predictions = generate_rasa_predictions(
+            examples,
+            rasa_url=rasa_url or os.getenv("RASA_REST_URL", "http://localhost:5005/webhooks/rest/webhook"),
+            sender=sender or os.getenv("RASA_CHAT_SENDER", "evaluation"),
+            timeout=timeout if timeout is not None else float(os.getenv("RASA_API_TIMEOUT", "30")),
+            concurrency=4,
+        )
+    return evaluate(examples, predictions, retrieved_ids_map, output_path)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Đánh giá RAG trên UIT-ViQuAD2.0")
     parser.add_argument("--split", default="validation", choices=("train", "validation", "test"))
     parser.add_argument("--predictions", default=None, help="Path đến file predictions.json")
     parser.add_argument("--retrieved_ids", default=None, help="Path đến file retrieved_ids.json")
+    parser.add_argument("--source", default="rasa", choices=("rasa", "oracle"),
+                        help="Nguồn prediction khi không có file predictions")
     parser.add_argument("--strategy", default="first_answer",
                         choices=("first_answer", "random_answer", "empty"),
                         help="Baseline strategy khi không có predictions thật")
+    parser.add_argument("--rasa_url", default=os.getenv("RASA_REST_URL", "http://localhost:5005/webhooks/rest/webhook"))
+    parser.add_argument("--sender", default=os.getenv("RASA_CHAT_SENDER", "evaluation"))
+    parser.add_argument("--timeout", type=float, default=float(os.getenv("RASA_API_TIMEOUT", "30")))
+    parser.add_argument("--concurrency", type=int, default=4, help="Số request Rasa chạy đồng thời")
     parser.add_argument("--output", default=None, help="Lưu kết quả JSON vào file này")
     args = parser.parse_args()
 
@@ -114,8 +144,18 @@ def main():
             predictions = json.load(f)
         print(f"Loaded {len(predictions):,} predictions từ {args.predictions}")
     else:
-        print(f"Không có predictions thật → dùng baseline strategy='{args.strategy}'")
-        predictions = make_dummy_predictions(examples, args.strategy)
+        if args.source == "rasa":
+            print(f"Không có predictions thật → gọi Rasa tại {args.rasa_url}")
+            predictions = generate_rasa_predictions(
+                examples,
+                rasa_url=args.rasa_url,
+                sender=args.sender,
+                timeout=args.timeout,
+                concurrency=args.concurrency,
+            )
+        else:
+            print(f"Không có predictions thật → dùng baseline strategy='{args.strategy}'")
+            predictions = make_dummy_predictions(examples, args.strategy)
 
     # Load retrieved ids (tuỳ chọn)
     retrieved_ids_map = None

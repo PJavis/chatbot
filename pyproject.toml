@@ -8,6 +8,7 @@ dependencies = [
     "datasets>=2.18.0",
     "pandas>=2.2.0",
     "numpy>=1.26.0",
+    "requests>=2.31.0",
     "tqdm>=4.66.0",
     "sacrebleu>=2.4.0",
     "gradio>=4.30.0",

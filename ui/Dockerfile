@@ -10,11 +10,11 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends curl && \
     rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt ./requirements.txt
+COPY ui/requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . /app
 
 EXPOSE 7860
 
-CMD ["python", "app.py"]
+CMD ["python", "ui/app.py"]

@@ -2,7 +2,7 @@ recipe: default.v1
 assistant_id: sharp-gulf
 language: en
 pipeline:
-- name: CompactLLMCommandGenerator
+- name: SearchReadyLLMCommandGenerator
   llm:
     model_group: openrouter-gemma
   flow_retrieval:
@@ -10,3 +10,11 @@ pipeline:
       model_group: openrouter-embeddings
 policies:
 - name: FlowPolicy
+- name: EnterpriseSearchPolicy
+  llm:
+    model_group: openrouter-gemma
+  embeddings:
+    model_group: openrouter-embeddings
+  vector_store:
+    type: faiss
+    source: "./docs"

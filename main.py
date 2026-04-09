@@ -3,12 +3,15 @@ Entry point cho chatbot project.
 
 Commands:
     python main.py download   – Tải & xử lý UIT-ViQuAD2.0
-    python main.py evaluate   – Chạy evaluation (oracle baseline)
-    python main.py demo       – Khởi động Gradio demo
+    python main.py evaluate   – Chạy evaluation qua Rasa knowledge base
+    python main.py demo       – Khởi động Gradio UI tích hợp
+    python main.py rasa       – Khởi động backend Rasa
     python main.py test       – Chạy manual test cases
 """
 
+import os
 import sys
+from pathlib import Path
 
 
 def cmd_download():
@@ -18,14 +21,19 @@ def cmd_download():
 
 def cmd_evaluate():
     from evaluation.evaluate import main
-    sys.argv = ["evaluate", "--split", "validation", "--strategy", "first_answer"]
+    sys.argv = ["evaluate", "--split", "validation", "--source", "rasa"]
     main()
 
 
 def cmd_demo():
-    from demo.app import build_app
+    from ui.app import build_app
     app = build_app()
     app.launch(share=False, server_name="0.0.0.0", server_port=7860)
+
+
+def cmd_rasa():
+    script = Path(__file__).parent / "rasa_app" / "start-rasa.sh"
+    os.execvp("bash", ["bash", str(script)])
 
 
 def cmd_test():
@@ -39,6 +47,7 @@ COMMANDS = {
     "download": cmd_download,
     "evaluate": cmd_evaluate,
     "demo": cmd_demo,
+    "rasa": cmd_rasa,
     "test": cmd_test,
 }
 
