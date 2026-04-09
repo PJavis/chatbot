@@ -1,0 +1,17 @@
+action_endpoint:
+  url: "http://localhost:5055/webhook"
+
+# Tracker store (mặc định InMemory, production dùng Redis)
+# tracker_store:
+#   type: redis
+#   url: localhost
+#   port: 6379
+#   db: 0
+#   password: null
+#   record_exp: 86400
+
+# Event broker (optional)
+# event_broker:
+#   type: kafka
+#   url: localhost
+#   topic: rasa_events

@@ -1,0 +1,64 @@
+{
+  "type": "MaxHistoryTrackerFeaturizer",
+  "state_featurizer": {
+    "action_texts": [],
+    "entity_tag_specs": [],
+    "feature_states": {
+      "intent": {
+        "affirm": 0,
+        "ask_faq": 1,
+        "ask_human_handoff": 2,
+        "ask_information": 3,
+        "ask_technical": 4,
+        "back": 5,
+        "deny": 6,
+        "goodbye": 7,
+        "greet": 8,
+        "nlu_fallback": 9,
+        "out_of_scope": 10,
+        "restart": 11,
+        "session_start": 12
+      },
+      "action_name": {
+        "action_listen": 0,
+        "action_restart": 1,
+        "action_session_start": 2,
+        "action_default_fallback": 3,
+        "action_deactivate_loop": 4,
+        "action_revert_fallback_events": 5,
+        "action_default_ask_affirmation": 6,
+        "action_default_ask_rephrase": 7,
+        "action_two_stage_fallback": 8,
+        "action_unlikely_intent": 9,
+        "action_back": 10,
+        "...": 11,
+        "action_extract_slots": 12,
+        "action_rag_search": 13,
+        "action_set_context": 14,
+        "action_human_handoff": 15,
+        "utter_affirm": 16,
+        "utter_ask_rephrase": 17,
+        "utter_error": 18,
+        "utter_goodbye": 19,
+        "utter_greet": 20,
+        "utter_human_handoff": 21,
+        "utter_no_result": 22,
+        "utter_out_of_scope": 23,
+        "utter_searching": 24
+      },
+      "entities": {
+        "error_code": 0,
+        "product": 1,
+        "topic": 2
+      },
+      "slots": {
+        "user_query_0": 0,
+        "rag_answer_0": 1,
+        "conversation_context_0": 2
+      },
+      "active_loop": {}
+    }
+  },
+  "remove_duplicates": true,
+  "max_history": 10
+}

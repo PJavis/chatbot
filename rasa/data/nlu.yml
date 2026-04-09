@@ -1,0 +1,95 @@
+version: "3.1"
+
+nlu:
+
+- intent: greet
+  examples: |
+    - Xin chào
+    - Chào bạn
+    - Hi
+    - Hello
+    - Cho tôi hỏi
+    - Bắt đầu thôi
+    - Hey
+    - Chào buổi sáng
+
+- intent: goodbye
+  examples: |
+    - Tạm biệt
+    - Bye
+    - Hẹn gặp lại
+    - Cảm ơn, tạm biệt
+    - Thôi nhé
+
+- intent: ask_information
+  examples: |
+    - [chính sách nghỉ phép](topic) là gì?
+    - Cho tôi biết về [quy trình onboarding](topic)
+    - Hỏi về [phúc lợi nhân viên](topic)
+    - Thủ tục [xin nghỉ phép](topic) như thế nào?
+    - [Quy định làm việc từ xa](topic) ra sao?
+    - Tôi muốn biết về [chính sách bảo hiểm](topic)
+    - [Lương thưởng](topic) được tính thế nào?
+    - Có thể cho tôi thông tin về [đào tạo nội bộ](topic) không?
+    - [Quy trình đánh giá hiệu suất](topic) diễn ra như thế nào?
+    - Hỏi về [chính sách công tác](topic)
+
+- intent: ask_technical
+  examples: |
+    - Lỗi [500](error_code) trong hệ thống nghĩa là gì?
+    - Cách khắc phục lỗi [database connection timeout](topic)
+    - Hướng dẫn cài đặt [VPN](product)
+    - [API](topic) của hệ thống XYZ dùng như thế nào?
+    - Cách reset [mật khẩu](topic) hệ thống nội bộ
+    - [Hệ thống CRM](product) bị lỗi, phải làm gì?
+    - Làm sao để tích hợp với [Jira](product)?
+    - Hướng dẫn sử dụng [GitLab CI/CD](topic)
+    - [Server](topic) bị down, quy trình xử lý là gì?
+    - Tôi không đăng nhập được [email công ty](product), phải làm gì?
+
+- intent: ask_faq
+  examples: |
+    - Giờ làm việc là mấy giờ?
+    - Công ty có cho làm thêm giờ không?
+    - Làm thế nào để đặt phòng họp?
+    - Ai là người liên hệ khi có vấn đề IT?
+    - Chính sách sử dụng thiết bị cá nhân thế nào?
+    - Có được dùng điện thoại cá nhân trong giờ làm không?
+    - Bãi đỗ xe ở đâu?
+    - Wifi của văn phòng là gì?
+    - Ăn trưa công ty có hỗ trợ gì không?
+    - Yêu cầu bảo mật thông tin là gì?
+
+- intent: affirm
+  examples: |
+    - Đúng
+    - Có
+    - Đúng rồi
+    - Chính xác
+    - Ok
+    - Vâng
+    - Tôi hiểu rồi
+
+- intent: deny
+  examples: |
+    - Không
+    - Không phải
+    - Không đúng
+    - Tôi không đồng ý
+    - Sai rồi
+
+- intent: out_of_scope
+  examples: |
+    - Hôm nay thời tiết thế nào?
+    - Kể chuyện cười đi
+    - Giá cổ phiếu bây giờ là bao nhiêu?
+    - Bạn là ai vậy?
+    - Tính 2+2 giúp tôi
+
+- intent: ask_human_handoff
+  examples: |
+    - Cho tôi gặp người thật
+    - Tôi muốn nói chuyện với nhân viên hỗ trợ
+    - Chuyển tôi đến support team
+    - Escalate vấn đề này
+    - Tôi cần gặp trực tiếp

@@ -1,0 +1,76 @@
+recipe: default.v1
+
+language: vi   # Tiếng Việt - dùng multilingual model bên dưới
+
+# ─── NLU Pipeline ───────────────────────────────────────────────
+pipeline:
+
+  # Tokenizer: hỗ trợ tiếng Việt (whitespace-based, đủ tốt cho bài toán nội bộ)
+- name: WhitespaceTokenizer
+
+  # Regex để bắt pattern đặc biệt (mã lỗi, email, v.v.)
+- name: RegexFeaturizer
+
+  # Vocabulary-based features
+- name: LexicalSyntacticFeaturizer
+
+  # Bag-of-words features
+- name: CountVectorsFeaturizer
+  analyzer: word
+
+  # Character n-gram features (giúp nhận dạng OOV words tốt hơn)
+- name: CountVectorsFeaturizer
+  alias: char_ngram
+  analyzer: char_wb
+  min_ngram: 1
+  max_ngram: 4
+
+  # Pretrained multilingual embeddings (hỗ trợ tiếng Việt tốt)
+- name: LanguageModelFeaturizer
+  model_name: bert
+  model_weights: bert-base-multilingual-cased
+    # Hoặc dùng PhoBERT cho tiếng Việt tốt hơn:
+    # model_weights: vinai/phobert-base
+
+  # Intent classifier
+- name: DIETClassifier
+  epochs: 100
+  constrain_similarities: true
+  entity_recognition: true
+
+  # Phát hiện intent không chắc chắn → fallback
+- name: FallbackClassifier
+  threshold: 0.7           # Dưới 70% confidence → fallback
+  ambiguity_threshold: 0.1
+
+  # Entity extraction với regex
+- name: RegexEntityExtractor
+
+  # Response selector (optional - nếu dùng chitchat)
+  # - name: ResponseSelector
+  #   epochs: 100
+
+# ─── Policies ───────────────────────────────────────────────────
+policies:
+
+  # Học từ stories (LSTM-based)
+- name: TEDPolicy
+  max_history: 10           # Nhớ 10 turns trước
+  epochs: 100
+  constrain_similarities: true
+
+  # Luôn ưu tiên rules trước
+- name: RulePolicy
+  core_fallback_threshold: 0.4
+  core_fallback_action_name: "action_default_fallback"
+  enable_fallback_prediction: true
+
+  # Memoize các conversation path đã thấy
+- name: MemoizationPolicy
+  max_history: 10
+
+  # Fallback khi không biết phải làm gì
+- name: UnexpecTEDIntentPolicy
+  max_history: 10
+  epochs: 100
+assistant_id: 20260409-111214-urbane-liquidation
