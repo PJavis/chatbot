@@ -1,9 +1,27 @@
 [project]
 name = "chatbot"
 version = "0.1.0"
-description = "Add your description here"
+description = "Vietnamese chatbot - Data & Evaluation on UIT-ViQuAD2.0"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "rasa-pro>=3.15.18",
+    "datasets>=2.18.0",
+    "pandas>=2.2.0",
+    "numpy>=1.26.0",
+    "tqdm>=4.66.0",
+    "sacrebleu>=2.4.0",
+    "gradio>=4.30.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=8.0.0",
+    "ipykernel>=6.29.0",
 ]
