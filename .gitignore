@@ -9,3 +9,12 @@ wheels/
 # Virtual environments
 .venv
 rasa_app/.env
+
+# Generated data and knowledge docs
+data/raw/
+data/processed/
+rasa_app/docs/
+rasa_app/.rasa/
+rasa_app/models/*.tar.gz
+
+rasa_app/.rasa/
