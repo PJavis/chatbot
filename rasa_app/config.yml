@@ -3,6 +3,7 @@ assistant_id: sharp-gulf
 language: en
 pipeline:
 - name: SearchReadyLLMCommandGenerator
+  prompt_template: "./prompts/command_generator_prompt.jinja2"
   llm:
     model_group: openrouter-gemma
   flow_retrieval:
@@ -10,7 +11,10 @@ pipeline:
       model_group: openrouter-embeddings
 policies:
 - name: FlowPolicy
+- name: RulePolicy
 - name: EnterpriseSearchPolicy
+  check_relevancy: true
+  prompt_template: "./prompts/enterprise_search_policy_prompt.jinja2"
   llm:
     model_group: openrouter-gemma
   embeddings:

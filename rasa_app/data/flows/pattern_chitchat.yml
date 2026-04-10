@@ -1,6 +1,6 @@
 flows:
   pattern_chitchat:
-    description: handle interactions with the user that are not task-oriented
+    description: handle non-task-oriented small talk that is not better matched by greet, thanks, ask_help, goodbye, or a factual corpus question
     name: pattern chitchat
     steps:
       - action: utter_free_chitchat_response

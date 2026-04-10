@@ -20,8 +20,12 @@ python "$SCRIPT_DIR/scripts/build_knowledge_docs.py" \
 
 cd "$SCRIPT_DIR"
 rasa train
+LATEST_MODEL="$(ls -t "$SCRIPT_DIR"/models/*.tar.gz | head -n 1)"
+python "$SCRIPT_DIR/scripts/patch_model_flow_retrieval_index.py" \
+  --model "$LATEST_MODEL" \
+  --cache-dir "$SCRIPT_DIR/.rasa/cache"
 if [ "$RASA_DEBUG" = "1" ]; then
-  exec rasa run --enable-api --port "$PORT" --cors "*" -vv
+  exec rasa run --model "$LATEST_MODEL" --enable-api --port "$PORT" --cors "*" -vv
 fi
 
-exec rasa run --enable-api --port "$PORT" --cors "*" --quiet
+exec rasa run --model "$LATEST_MODEL" --enable-api --port "$PORT" --cors "*" --quiet

@@ -4,16 +4,34 @@ rules:
   - rule: respond to greetings
     steps:
       - intent: greet
-      - action: utter_free_chitchat_response
+      - action: utter_greet
+
   - rule: describe assistant capabilities
     steps:
       - intent: ask_help
       - action: utter_help_overview
+
   - rule: handle gratitude
     steps:
       - intent: thanks
-      - action: utter_free_chitchat_response
+      - action: utter_appreciation
+
   - rule: say goodbye
     steps:
       - intent: goodbye
+      - action: utter_goodbye
+
+  - rule: handle general small talk
+    steps:
+      - intent: chitchat
       - action: utter_free_chitchat_response
+
+  - rule: answer factual questions from the corpus with enterprise search
+    steps:
+      - intent: ask_knowledge
+      - action: action_trigger_search
+
+  - rule: refuse unsupported or missing-information questions cleanly
+    steps:
+      - intent: ask_out_of_scope
+      - action: utter_no_relevant_answer_found

@@ -9,6 +9,7 @@ import sys
 import tempfile
 import unicodedata
 from pathlib import Path
+from uuid import uuid4
 
 import gradio as gr
 import pandas as pd
@@ -20,7 +21,7 @@ if str(ROOT) not in sys.path:
 
 from data import load_corpus, load_split
 from evaluation.metrics import bleu_score, evaluate_predictions, exact_match, token_f1
-from rasa_inference import call_rasa, format_response, generate_rasa_predictions
+from rasa_inference import call_rasa, format_response, generate_rasa_predictions, make_sender
 
 RASA_REST_URL = os.getenv("RASA_REST_URL", "http://localhost:5005/webhooks/rest/webhook")
 RASA_SENDER = os.getenv("RASA_CHAT_SENDER", "gradio_user")
@@ -36,6 +37,10 @@ _corpus: list[dict] | None = None
 _splits: dict[str, list[dict]] = {}
 _corpus_by_id: dict[str, dict] = {}
 LOGGER = logging.getLogger("ui.chat")
+
+
+def _new_sender() -> str:
+    return make_sender(RASA_SENDER, uuid4().hex)
 
 
 def _configure_logging() -> None:
@@ -295,7 +300,7 @@ def generate_predictions_file(examples_file, concurrency: int) -> tuple[str | No
 
 
 def _normalize_history(history: list[object] | None) -> list[dict[str, str]]:
-    """Convert any prior chatbot state into the messages format this Gradio build expects."""
+    """Convert any prior chatbot state into role/content messages."""
     normalized: list[dict[str, str]] = []
     for item in history or []:
         if isinstance(item, dict):
@@ -315,23 +320,23 @@ def _normalize_history(history: list[object] | None) -> list[dict[str, str]]:
     return normalized
 
 
-def stream_response(message: str, history: list[object] | None):
+def stream_response(message: str, history: list[object] | None, sender: str):
     """Stream assistant text back to Gradio while preserving chat history."""
     history = _normalize_history(history)
     if not message or not message.strip():
-        yield history, ""
+        yield history, "", history, sender
         return
 
     LOGGER.info("Sending message to Rasa: %s", message)
     LOGGER.info("Current chatbot history before request: %s", history)
 
     try:
-        rasa_payload = call_rasa(message, rasa_url=RASA_REST_URL, sender=RASA_SENDER, timeout=RASA_TIMEOUT)
+        rasa_payload = call_rasa(message, rasa_url=RASA_REST_URL, sender=sender, timeout=RASA_TIMEOUT)
     except requests.RequestException as exc:
         LOGGER.exception("Rasa request failed for message: %s", message)
         history.append({"role": "user", "content": message})
         history.append({"role": "assistant", "content": f"Failed to reach Rasa: {exc}"})
-        yield history[:], ""
+        yield history[:], "", history[:], sender
         return
 
     LOGGER.info(
@@ -347,15 +352,16 @@ def stream_response(message: str, history: list[object] | None):
     for word in assistant_text.split():
         streamed = f"{streamed} {word}".strip()
         history[-1]["content"] = streamed
-        yield history[:], ""
+        yield history[:], "", history[:], sender
 
     if streamed != assistant_text:
         history[-1]["content"] = assistant_text
-        yield history[:], ""
+        yield history[:], "", history[:], sender
 
 
 def new_conversation():
-    return [], ""
+    empty_history: list[dict[str, str]] = []
+    return empty_history, "", empty_history, _new_sender()
 
 
 def build_app() -> gr.Blocks:
@@ -473,6 +479,8 @@ def build_app() -> gr.Blocks:
                     "### Gửi tin nhắn đến Rasa REST channel\n"
                     "Tab này forward trực tiếp message đến `RASA_REST_URL` và stream câu trả lời theo từng từ."
                 )
+                chat_history = gr.State([])
+                sender_state = gr.State(_new_sender())
                 chatbot = gr.Chatbot(
                     elem_id="rasa-chatbot",
                     height=520,
@@ -486,9 +494,18 @@ def build_app() -> gr.Blocks:
                     send_btn = gr.Button("Send")
                     reset_btn = gr.Button("New conversation")
 
-                message_input.submit(stream_response, [message_input, chatbot], [chatbot, message_input])
-                send_btn.click(stream_response, [message_input, chatbot], [chatbot, message_input])
-                reset_btn.click(new_conversation, outputs=[chatbot, message_input])
+                app.load(new_conversation, outputs=[chatbot, message_input, chat_history, sender_state])
+                message_input.submit(
+                    stream_response,
+                    [message_input, chat_history, sender_state],
+                    [chatbot, message_input, chat_history, sender_state],
+                )
+                send_btn.click(
+                    stream_response,
+                    [message_input, chat_history, sender_state],
+                    [chatbot, message_input, chat_history, sender_state],
+                )
+                reset_btn.click(new_conversation, outputs=[chatbot, message_input, chat_history, sender_state])
 
     return app
 

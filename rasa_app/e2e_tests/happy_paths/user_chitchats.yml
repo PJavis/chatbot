@@ -1,0 +1,55 @@
+test_cases:
+  - test_case: user greets the assistant
+    steps:
+      - user: hello
+      - action: utter_greet
+
+  - test_case: user says thanks
+    steps:
+      - user: thanks
+      - action: utter_appreciation
+
+  - test_case: user says goodbye
+    steps:
+      - user: goodbye
+      - action: utter_goodbye
+
+  - test_case: user greets casually in Vietnamese
+    steps:
+      - user: xin chào
+      - action: utter_greet
+
+  - test_case: user asks what the assistant can do
+    steps:
+      - user: can you help me?
+      - action: utter_help_overview
+
+  - test_case: user asks for help in Vietnamese
+    steps:
+      - user: bạn giúp được gì?
+      - action: utter_help_overview
+
+  - test_case: user expresses appreciation casually
+    steps:
+      - user: cảm ơn nhé
+      - action: utter_appreciation
+
+  - test_case: user says bye in Vietnamese
+    steps:
+      - user: tạm biệt nha
+      - action: utter_goodbye
+
+  - test_case: user makes small talk
+    steps:
+      - user: how are you today?
+      - action: utter_free_chitchat_response
+
+  - test_case: user makes small talk in Vietnamese
+    steps:
+      - user: hôm nay bạn thế nào?
+      - action: utter_free_chitchat_response
+
+  - test_case: user asks an unsupported future fact
+    steps:
+      - user: GDP của Việt Nam năm 2050 là bao nhiêu?
+      - action: utter_no_relevant_answer_found

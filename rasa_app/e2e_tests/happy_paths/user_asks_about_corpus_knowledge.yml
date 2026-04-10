@@ -1,0 +1,75 @@
+test_cases:
+  - test_case: user asks a factual question from the corpus
+    steps:
+      - user: Tên gọi nào được Phạm Văn Đồng sử dụng khi làm Phó chủ nhiệm cơ quan Biện sự xứ tại Quế Lâm?
+      - action: action_trigger_search
+
+  - test_case: user asks about a location described in the corpus
+    steps:
+      - user: Cuộc cách mạng Pháp diễn ra ở đâu?
+      - action: action_trigger_search
+
+  - test_case: user asks about a date or year from the corpus
+    steps:
+      - user: Đến năm 1831 thì trấn Bình Hòa được đổi tên thành gì?
+      - action: action_trigger_search
+
+  - test_case: user asks a geographic knowledge question from the corpus
+    steps:
+      - user: Biển nào tiếp giáp với bang California?
+      - action: action_trigger_search
+
+  - test_case: user asks an open ended informational question from the corpus
+    steps:
+      - user: Vị trí địa lý của Pháp có gì đặc biệt?
+      - action: action_trigger_search
+
+  - test_case: user asks about a historical purpose described in the corpus
+    steps:
+      - user: Mục đích của hiệp định sơ bộ Pháp-Việt (1946) là gì?
+      - action: action_trigger_search
+
+  - test_case: user asks about a ranking or ordinal fact
+    steps:
+      - user: Xã hội Pháp được xếp hạng đứng thứ mấy thế giới năm 2006?
+      - action: action_trigger_search
+
+  - test_case: user asks when an event happened
+    steps:
+      - user: Hoa Kỳ thiết lập ngoại giao với Gruzia vào năm nào?
+      - action: action_trigger_search
+
+  - test_case: user asks which entities satisfy a condition
+    steps:
+      - user: Những thành phố nào tại Texas có dân số trên 1 triệu người?
+      - action: action_trigger_search
+
+  - test_case: user asks for a method or mechanism
+    steps:
+      - user: Đại tá French đã sử dụng phương pháp liên lạc nào thay cho hệ thống liên lạc vô tuyến của Bộ Chiến tranh Hoa Kỳ với Honolulu?
+      - action: action_trigger_search
+
+  - test_case: user asks a why question from the corpus
+    steps:
+      - user: Vì sao các ưu thế trong công nghệ quân sự của liên minh không được phát huy tốt khi chiến đấu nội thành?
+      - action: action_trigger_search
+
+  - test_case: user asks about an economic challenge
+    steps:
+      - user: Giá nhân công cao khiến Puerto Rico đương đầu với thách thức nào?
+      - action: action_trigger_search
+
+  - test_case: user asks for a slogan
+    steps:
+      - user: Khẩu hiệu của Wikipedia là gì?
+      - action: action_trigger_search
+
+  - test_case: user asks where a phenomenon was discovered
+    steps:
+      - user: Hiện tượng nước trồi quy mô lớn được phát hiện ở đâu?
+      - action: action_trigger_search
+
+  - test_case: user asks how a condition affected someone
+    steps:
+      - user: Sức khỏe đã ảnh hưởng đến giao tiếp của Copley như thế nào sau năm 2005?
+      - action: action_trigger_search

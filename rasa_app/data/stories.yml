@@ -1,0 +1,62 @@
+version: "3.1"
+
+stories:
+  - story: greet then ask corpus question then thank
+    steps:
+      - intent: greet
+      - action: utter_greet
+      - intent: ask_knowledge
+      - action: action_trigger_search
+      - intent: thanks
+      - action: utter_appreciation
+
+  - story: ask for help before asking a factual question
+    steps:
+      - intent: ask_help
+      - action: utter_help_overview
+      - intent: ask_knowledge
+      - action: action_trigger_search
+
+  - story: user asks two corpus questions in sequence
+    steps:
+      - intent: ask_knowledge
+      - action: action_trigger_search
+      - intent: ask_knowledge
+      - action: action_trigger_search
+
+  - story: social small talk then move into knowledge search
+    steps:
+      - intent: chitchat
+      - action: utter_free_chitchat_response
+      - intent: ask_knowledge
+      - action: action_trigger_search
+
+  - story: greet then unsupported question then goodbye
+    steps:
+      - intent: greet
+      - action: utter_greet
+      - intent: ask_out_of_scope
+      - action: utter_no_relevant_answer_found
+      - intent: goodbye
+      - action: utter_goodbye
+
+  - story: help request followed by unsupported question
+    steps:
+      - intent: ask_help
+      - action: utter_help_overview
+      - intent: ask_out_of_scope
+      - action: utter_no_relevant_answer_found
+
+  - story: user alternates between unsupported and supported questions
+    steps:
+      - intent: ask_out_of_scope
+      - action: utter_no_relevant_answer_found
+      - intent: ask_knowledge
+      - action: action_trigger_search
+
+  - story: user asks factual question then closes conversation
+    steps:
+      - intent: ask_knowledge
+      - action: action_trigger_search
+      - intent: goodbye
+      - action: utter_goodbye

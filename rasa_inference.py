@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from uuid import uuid4
 from typing import Sequence
 
 import requests
@@ -15,9 +16,17 @@ def call_rasa(message: str, rasa_url: str, sender: str, timeout: float) -> list[
     return response.json()
 
 
+def make_sender(base: str, suffix: str | None = None) -> str:
+    token = suffix or uuid4().hex
+    return f"{base}-{token}"
+
+
 def format_response(response: Sequence[dict]) -> str:
-    texts = [segment.get("text", "") for segment in response if segment.get("text")]
-    return " ".join(texts).strip() or "(no response)"
+    texts = [text for segment in response if (text := segment.get("text", "").strip())]
+    combined = " ".join(texts).strip()
+    if not combined:
+        return "(no response)"
+    return combined
 
 
 def generate_rasa_predictions(
@@ -34,7 +43,8 @@ def generate_rasa_predictions(
         if not question:
             return ex["id"], ""
         try:
-            response = call_rasa(question, rasa_url=rasa_url, sender=sender, timeout=timeout)
+            isolated_sender = make_sender(sender, ex.get("id") or None)
+            response = call_rasa(question, rasa_url=rasa_url, sender=isolated_sender, timeout=timeout)
             return ex["id"], format_response(response)
         except requests.RequestException:
             return ex["id"], ""

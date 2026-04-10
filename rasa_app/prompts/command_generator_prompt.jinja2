@@ -1,0 +1,69 @@
+## Critical rules (follow first)
+1. Output commands as plain text only.
+2. Do not output JSON.
+3. Do not output Markdown.
+4. Do not use code fences.
+5. Do not add explanations, labels, bullets, numbering, or any surrounding text.
+6. Each command must be on its own line.
+7. If the correct action is search, output exactly `search and reply` on a single line.
+
+## Task
+Analyze the conversation context and generate a list of actions: start flows, set slots, or respond via search and reply when no flow fits.
+{% if current_datetime %}
+### Date & Time Context
+- Current date: {{ current_datetime.strftime("%d %B, %Y") }}
+- Current time: {{ current_datetime.strftime("%H:%M:%S") }} ({{ current_datetime.tzname() }})
+- Current day: {{ current_datetime.strftime("%A") }}
+{% endif %}
+
+## Available Flows and Slots
+```json
+{"flows":[{% for flow in available_flows %}{"name":"{{ flow.name }}","description":{{ flow.description | to_json_escaped_string }}{% if flow.slots %},"slots":[{% for slot in flow.slots %}{"name":"{{ slot.name }}"{% if slot.description %},"description":{{ slot.description | to_json_escaped_string }}{% endif %}{% if slot.allowed_values %},"allowed_values":{{ slot.allowed_values }}{% endif %}}{% if not loop.last %},{% endif %}{% endfor %}]{% endif %}}{% if not loop.last %},{% endif %}{% endfor %}]}
+```
+
+## Available Actions
+* `start flow flow_name`
+* `set slot slot_name slot_value`
+* `disambiguate flows flow_name1 flow_name2 ...`
+* `search and reply`
+* `cancel flow`
+* `repeat message`
+
+## General instructions
+* Use only the exact action formats listed above.
+* Never wrap commands in JSON arrays or objects.
+* Never wrap commands in triple backticks.
+* Never return natural-language prose.
+* Focus on the user's last message.
+* Only use information provided by the user and conversation context.
+* If the message is a greeting, help request, gratitude, goodbye, or casual chat, start the matching social flow.
+* If the message is a factual question that should be answered from the knowledge corpus, return `search and reply`.
+* If the message is unsupported, out of scope, or not grounded in the available flows, still return `search and reply` so the search policy can decide whether to answer or refuse.
+* Never invent a flow or slot when the message only asks for a fact, location, date, name, explanation, or other corpus-grounded detail.
+* When a user asks the same factual question again after a refusal or a partial answer, still return `search and reply` rather than trying to correct the answer yourself.
+* If the user gives a clear slot value for an active or started flow, prefer `set slot` over search.
+* If the message could fit multiple flows, use `disambiguate flows` before search.
+
+## Decision Rule Table
+| Condition                                                       | Action                                                                 |
+|-----------------------------------------------------------------|------------------------------------------------------------------------|
+| Flow perfectly matches user's message                           | start flow                                                             |
+| User provided a value for a slot (active flow or flow you start)| set slot (one per value); if also starting a flow, output start flow first, then set slot lines |
+| Multiple flows are equally strong, relevant matches             | disambiguate flows                                                     |
+| User's message is unclear or imprecise                          | disambiguate flows                                                     |
+| No flow fits at all, but knowledge base may help                | search and reply                                                       |
+
+## Current State
+{% if current_flow != None %}Use the following structured data:
+```json
+{"active_flow":"{{ current_flow }}","current_step":{"requested_slot":"{{ current_slot }}","requested_slot_description":{{ current_slot_description | to_json_escaped_string }}},"slots":[{% for slot in flow_slots %}{"name":"{{ slot.name }}","value":"{{ slot.value }}","type":"{{ slot.type }}"{% if slot.description %},"description":{{ slot.description | to_json_escaped_string }}{% endif %}{% if slot.allowed_values %},"allowed_values":"{{ slot.allowed_values }}"{% endif %}}{% if not loop.last %},{% endif %}{% endfor %}]}
+```{% else %}
+You are currently not inside any flow.{% endif %}
+
+## Conversation History
+{{ current_conversation }}
+
+## Final output requirement
+Return only the action list, with one command per line and nothing else.
+
+User's last message: """{{ user_message }}"""

@@ -1,0 +1,91 @@
+version: "3.1"
+
+nlu:
+  - intent: greet
+    examples: |
+      - xin chào
+      - chào bạn
+      - chào bot
+      - hello
+      - hi
+      - hey
+      - alo
+      - chào buổi sáng
+      - chào buổi tối
+
+  - intent: ask_help
+    examples: |
+      - bạn giúp được gì?
+      - bạn có thể làm gì?
+      - hướng dẫn mình dùng bot này
+      - mình nên hỏi gì?
+      - help me
+      - what can you do?
+      - bạn hỗ trợ những loại câu hỏi nào?
+      - làm sao để hỏi đúng?
+
+  - intent: thanks
+    examples: |
+      - cảm ơn
+      - cảm ơn bạn
+      - cảm ơn nhé
+      - cám ơn nhiều
+      - thank you
+      - thanks
+      - ok cảm ơn
+      - rất hữu ích, cảm ơn
+
+  - intent: goodbye
+    examples: |
+      - tạm biệt
+      - bye
+      - goodbye
+      - hẹn gặp lại
+      - thôi nhé
+      - kết thúc tại đây
+      - chào tạm biệt
+
+  - intent: chitchat
+    examples: |
+      - hôm nay bạn thế nào?
+      - bạn khỏe không?
+      - nói chuyện chút đi
+      - kể chuyện vui đi
+      - bạn là ai?
+      - how are you today?
+      - let's chat
+      - bạn có vui không?
+
+  - intent: ask_knowledge
+    examples: |
+      - Tên gọi nào được Phạm Văn Đồng sử dụng khi làm Phó chủ nhiệm cơ quan Biện sự xứ tại Quế Lâm?
+      - Phạm Văn Đồng giữ chức vụ gì trong bộ máy Nhà nước Cộng hòa Xã hội chủ nghĩa Việt Nam?
+      - Giai đoạn năm 1955-1976, Phạm Văn Đồng nắm giữ chức vụ gì?
+      - Chủ tịch Hội đồng Bộ trưởng đầu tiên của nước Cộng hòa xã hội chủ nghĩa Việt Nam là ai?
+      - Sự kiện quan trọng nào đã diễn ra vào ngày 20/7/1954?
+      - Chức vụ mà Phạm Văn Đồng đảm nhiệm tại Hội nghị Geneve về Đông Dương là gì?
+      - Cuộc cách mạng Pháp diễn ra ở đâu?
+      - Vị trí địa lý của Pháp có gì đặc biệt?
+      - Biển nào tiếp giáp với bang California?
+      - Sacramento tọa lạc ở đâu trong lãnh thổ tiểu bang?
+      - Khu vực thủ phủ của bang California nằm ở đâu?
+      - Hoa Kỳ thiết lập ngoại giao với Gruzia vào năm nào?
+      - Xã hội Pháp được xếp hạng đứng thứ mấy thế giới năm 2006?
+      - Khẩu hiệu của Wikipedia là gì?
+      - Hiện tượng nước trồi quy mô lớn được phát hiện ở đâu?
+      - Giá nhân công cao khiến Puerto Rico đương đầu với thách thức nào?
+      - Vì sao các ưu thế trong công nghệ quân sự của liên minh không được phát huy tốt khi chiến đấu nội thành?
+      - Đại tá French đã sử dụng phương pháp liên lạc nào thay cho hệ thống liên lạc vô tuyến của Bộ Chiến tranh Hoa Kỳ với Honolulu?
+
+  - intent: ask_out_of_scope
+    examples: |
+      - GDP của Việt Nam năm 2050 là bao nhiêu?
+      - Hồ Học Lãm giữ chức vụ gì trong bộ máy Nhà nước Cộng hòa Xã hội chủ nghĩa Việt Nam?
+      - Giai đoạn năm 1987-2000, Phạm Văn Đồng nắm giữ chức vụ gì?
+      - Hội nghị Đông Dương về Geneve có tính chất như thế nào?
+      - Bà Cúc từng cố gắng đưa Phạm Văn Đồng đến nơi nào để chữa bệnh?
+      - Sai lầm mà cố thủ tướng Phạm Văn Đồng mắc phải khi đàm phán hiệp định với Trung Quốc là gì?
+      - Giá vàng hôm nay là bao nhiêu?
+      - Dự báo thời tiết ngày mai thế nào?
+      - Ai sẽ vô địch World Cup tiếp theo?
+      - Cho mình biết thông tin không có trong tài liệu

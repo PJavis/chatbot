@@ -1,0 +1,24 @@
+flows:
+  greet:
+    description: handle greetings, hellos, hi messages, and casual salutations from the user in either Vietnamese or English
+    name: greet
+    steps:
+      - action: utter_greet
+
+  ask_help:
+    description: explain that the assistant answers Vietnamese knowledge questions grounded in the UIT-ViQuAD corpus and also handles brief social conversation
+    name: ask help
+    steps:
+      - action: utter_help_overview
+
+  thanks:
+    description: respond when the user expresses thanks, appreciation, or gratitude after a search answer, help message, or chitchat turn
+    name: thanks
+    steps:
+      - action: utter_appreciation
+
+  goodbye:
+    description: respond when the user says goodbye, bye, see you, or clearly ends the conversation
+    name: goodbye
+    steps:
+      - action: utter_goodbye

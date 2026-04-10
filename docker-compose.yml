@@ -30,8 +30,10 @@ services:
     environment:
       - RASA_REST_URL=http://rasa:5005/webhooks/rest/webhook
       - RASA_CHAT_SENDER=gradio_user
+      - RASA_API_TIMEOUT=75
       - UI_PORT=7860
       - RASA_DATA_SOURCE=/data/processed
       - RASA_KB_DIR=/app/docs
     volumes:
+      - .:/app:ro
       - ./data:/app/data:ro

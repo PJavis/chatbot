@@ -11,33 +11,69 @@ intents:
   - ask_help
   - thanks
   - goodbye
+  - chitchat
+  - ask_knowledge
+  - ask_out_of_scope
 
 responses:
+  utter_ask_continue_conversation:
+    - text: ""
+  utter_ask_rephrase:
+    - text: "Tôi chưa hiểu yêu cầu của bạn."
+  utter_ask_continue_interrupted_flow_confirmation:
+    - text: "Bạn có muốn tiếp tục {{context.interrupted_flow_options}}?"
+  utter_ask_csat_score:
+    - text: "Bạn đánh giá trải nghiệm hôm nay thế nào?"
+      buttons:
+        - title: "👍 Hài lòng"
+          payload: "/SetSlots(csat_score=satisfied)"
+        - title: "👎 Chưa hài lòng"
+          payload: "/SetSlots(csat_score=unsatisfied)"
+  utter_ask_interrupted_flow_to_continue:
+    - text: "Bạn có muốn tiếp tục {{context.interrupted_flow_options}}?"
+  utter_ask_still_there:
+    - text: "Bạn còn ở đó không?"
+  utter_boolean_slot_rejection:
+    - text: "Giá trị `{{value}}` không hợp lệ. Vui lòng trả lời lại bằng giá trị hợp lệ."
+  utter_can_do_something_else:
+    - text: "Vui lòng nêu rõ yêu cầu."
+  utter_categorical_slot_rejection:
+    - text: "Giá trị `{{value}}` không hợp lệ. Vui lòng chọn một giá trị phù hợp."
+  utter_clarification_no_options_rasa:
+    - text: "Tôi cần thêm thông tin để hiểu đúng yêu cầu của bạn."
+  utter_clarification_options_rasa:
+    - text: "Tôi cần làm rõ yêu cầu. Bạn muốn: {{context.clarification_options}}?"
+  utter_closing_words:
+    - text: "Đã rõ."
+  utter_corrected_previous_input:
+    - text: "Tôi đã cập nhật {{ context.corrected_slots.keys()|join(', ') }} thành {{ context.new_slot_values | join(', ') }}."
+  utter_csat_thank_you_satisfied:
+    - text: "Cảm ơn phản hồi của bạn."
+  utter_csat_thank_you_unsatisfied:
+    - text: "Cảm ơn phản hồi của bạn."
+  utter_float_slot_rejection:
+    - text: "Giá trị `{{value}}` không phải là số hợp lệ. Vui lòng nhập lại."
+  utter_flow_cancelled_rasa:
+    - text: "Đã dừng {{ context.canceled_name }}."
+  utter_human_handoff_not_available:
+    - text: "Hiện tại tôi chưa thể chuyển sang nhân viên hỗ trợ."
+  utter_inform_code_change:
+    - text: "Mã xác nhận đã thay đổi."
+  utter_inform_hangup:
+    - text: "Cuộc trò chuyện đã kết thúc."
+  utter_no_knowledge_base:
+    - text: "Hiện chưa có dữ liệu tri thức để trả lời câu hỏi này."
+  utter_no_relevant_answer_found:
+    - text: "Tôi không tìm thấy thông tin phù hợp trong tài liệu."
+  utter_skip_question_answer:
+    - text: "Đã bỏ qua câu hỏi này."
   utter_greet:
-    - text: "Hello! I can help you manage your contacts or answer general questions."
+    - text: "Xin chào. Tôi có thể trả lời câu hỏi dựa trên kho tri thức hoặc trò chuyện ngắn gọn bằng tiếng Việt."
   utter_help_overview:
-    - text: "I can add, list, or remove contacts. Ask me to add someone by handle, or say 'list my contacts.'"
+    - text: "Tôi hỗ trợ hai kiểu hội thoại: trả lời câu hỏi dựa trên kho tri thức và trò chuyện thông thường, luôn bằng tiếng Việt."
   utter_appreciation:
-    - text: "You're welcome! Let me know if you need anything else."
+    - text: "Không có gì."
   utter_goodbye:
-    - text: "Goodbye! Reach out again if you need more help."
+    - text: "Tạm biệt."
   utter_free_chitchat_response:
-    - text: "I'm here to help."
-      metadata:
-        rephrase: True
-        rephrase_prompt: |
-          You are a friendly assistant that replies to casual conversation.
-          Write a short, natural, and context-aware response to the user's latest message.
-          Keep it conversational and avoid sounding robotic.
-          Use the conversation context and the latest user message to shape the reply.
-
-          Conversation history:
-          {{history}}
-
-          Latest user message:
-          {{current_input}}
-
-          Suggested response:
-          {{suggested_response}}
-
-          Rewritten response:
+    - text: "Tôi có thể hỗ trợ."

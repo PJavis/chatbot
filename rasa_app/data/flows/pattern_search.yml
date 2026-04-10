@@ -1,6 +1,6 @@
 flows:
   pattern_search:
-    description: handle a knowledge-based question or request
+    description: handle factual questions that should be answered only from the UIT-ViQuAD knowledge corpus, including people, places, dates, roles, geography, history, definitions, quantities, causes, and explanations; do not rely on outside knowledge when the corpus lacks evidence
     name: pattern search
     steps:
       - action: action_trigger_search

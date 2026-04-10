@@ -65,20 +65,22 @@ action_endpoint:
 #nlg:
 #   type: rephrase
 
-nlg:
-  type: rephrase
-  llm:
-    model_group: openrouter-gemma
+# Disable the global contextual rephraser so responses stay tightly scoped
+# to the original answer content without extra follow-up questions.
+#nlg:
+#  type: rephrase
+#  llm:
+#    model_group: openrouter-gemma
 
 model_groups:
   - id: openrouter-gemma
     models:
       - provider: openrouter
-        model: openrouter/google/gemma-3-4b-it
+        model: openrouter/google/gemma-3-12b-it
         base_url: "https://openrouter.ai/api/v1"
         api_base: "https://openrouter.ai/api/v1"
         api_key: ${OPENROUTER_API_KEY}
-        timeout: 15
+        timeout: 60
   - id: openrouter-embeddings
     models:
       - provider: openrouter
@@ -86,4 +88,4 @@ model_groups:
         base_url: "https://openrouter.ai/api/v1"
         api_base: "https://openrouter.ai/api/v1"
         api_key: ${OPENROUTER_API_KEY}
-        timeout: 15
+        timeout: 30
