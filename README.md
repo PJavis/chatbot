@@ -34,17 +34,21 @@ uv sync
 ```
 chatbot/
 ├── data/
-│   ├── __init__.py          # Hàm tiện ích: load_corpus(), load_split()
-│   ├── download.py          # Script tải & làm sạch dataset
-│   ├── raw/                 # JSON gốc từ HuggingFace (sau khi download)
-│   └── processed/           # Dữ liệu đã xử lý (corpus + splits)
+│   ├── __init__.py          # Hàm tiện ích: load_corpus(), load_split()
+│   ├── download.py          # Script tải & làm sạch dataset
+│   ├── build_db.py          # Script nhúng dữ liệu vào Vector DB
+│   ├── raw/                 # JSON gốc từ HuggingFace
+│   ├── processed/           # Dữ liệu đã xử lý (corpus + splits)
+│   └── chroma_db/           # Lưu trữ Vector Database cục bộ
 ├── evaluation/
-│   ├── metrics.py           # Các metrics: EM, F1, BLEU, Recall@k
-│   ├── test_cases.py        # 10 test cases thủ công + hàm run_test_cases()
-│   └── evaluate.py          # CLI chạy evaluation trên file predictions
+│   ├── metrics.py           # Các metrics: EM, F1, BLEU, Recall@k
+│   ├── test_cases.py        # 10 test cases thủ công + hàm run_test_cases()
+│   └── evaluate.py          # CLI chạy evaluation trên file predictions
 ├── demo/
-│   └── app.py               # Gradio demo (3 tab)
-└── main.py                  # Entry point tổng hợp
+│   └── app.py               # Gradio demo (3 tab)
+├── api.py                   # FastAPI Backend cung cấp endpoint RAG
+├── rag_pipeline.py          # Core RAG: Langchain + ChromaDB + Gemini
+└── main.py                  # Entry point tổng hợp
 ```
 
 ---
@@ -75,9 +79,24 @@ test       :  7,290 mẫu
 Corpus     :    138 đoạn văn
 ```
 
+### Bước 2 – Xây dựng Vector Database
+```bash
+uv run python main.py build_db
+```
+Script sẽ thực hiện:
+- Đọc corpus từ data/processed/corpus.json.
+- Sử dụng keepitreal/vietnamese-sbert để tạo vector embeddings.
+- Lưu trữ index vào thư mục data/chroma_db/.
+
+### Bước 3 – Khởi động RAG API
+```bash
+uv run python main.py api
+```
+Server sẽ lắng nghe tại http://localhost:8000. Bạn có thể truy cập /docs để thử nghiệm API. Hệ thống sẽ tự động tìm kiếm ngữ cảnh liên quan và dùng Gemini 2.5 Flash Lite để trả lời.
+
 ---
 
-### Bước 2 – Chạy Gradio Demo
+### Bước 4 – Chạy Gradio Demo
 
 ```bash
 python main.py demo
@@ -95,7 +114,7 @@ Mở trình duyệt tại `http://localhost:7860`. Demo gồm 3 tab:
 
 ---
 
-### Bước 3 – Đánh giá hệ thống RAG
+### Bước 5 – Đánh giá hệ thống RAG
 
 #### Chuẩn bị file predictions
 
@@ -151,7 +170,7 @@ Kết quả sẽ bao gồm thêm **Recall@1**, **Recall@3**, **Recall@5**.
 
 ---
 
-### Bước 4 – Chạy test cases thủ công
+### Bước 6 – Chạy test cases thủ công
 
 ```bash
 python main.py test
@@ -482,18 +501,15 @@ ActionRagSearch: enrich query + gọi RAG API
 Trả về câu trả lời + nguồn tài liệu (📎 Nguồn: ...)
 ```
 
-### Fake RAG API (`fake_rag_api.py`)
-
-FastAPI trên port 8000, dùng để test mà không cần LLM/FAISS thật. Có 12 tài liệu về: nghỉ phép, WFH, VPN, mật khẩu, lương thưởng, onboarding, GitLab CI/CD, bảo mật, v.v.
-
+### Cách chạy Rasa (Live RAG)
 ```bash
-# Chạy fake RAG API
-uv run python rasa/fake_rag_api.py
+# Terminal 1: Chạy RAG API
+uv run python main.py api
 
-# Chạy action server
+# Terminal 2: Chạy Action Server
 uv run rasa run actions --actions actions --port 5055
 
-# Chạy Rasa
+# Terminal 3: Chạy Rasa Bot
 uv run rasa run --enable-api
 ```
 
