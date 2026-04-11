@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="720" viewBox="0 0 1180 720" role="img" aria-labelledby="title desc">
+  <title id="title">Rasa Conversation Flows</title>
+  <desc id="desc">Small diagram showing how user messages are routed through Rasa conversation flows for greetings, help, thanks, goodbye, chitchat, knowledge search, and fallback.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#f8fbff"/>
+      <stop offset="100%" stop-color="#fff8ec"/>
+    </linearGradient>
+    <linearGradient id="decision" x1="0" x2="1">
+      <stop offset="0%" stop-color="#e3f7df"/>
+      <stop offset="100%" stop-color="#f7fff4"/>
+    </linearGradient>
+    <linearGradient id="search" x1="0" x2="1">
+      <stop offset="0%" stop-color="#dff1ff"/>
+      <stop offset="100%" stop-color="#f5fbff"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#1d2b3a" flood-opacity="0.12"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#335166"/>
+    </marker>
+    <style>
+      .title { font: 800 30px Georgia, "Times New Roman", serif; fill: #20313f; }
+      .subtitle { font: 500 15px "Avenir Next", "Trebuchet MS", sans-serif; fill: #526879; }
+      .label { font: 800 16px "Avenir Next", "Trebuchet MS", sans-serif; fill: #253746; }
+      .small { font: 500 13px "Avenir Next", "Trebuchet MS", sans-serif; fill: #536879; }
+      .tiny { font: 500 12px "Avenir Next", "Trebuchet MS", sans-serif; fill: #637687; }
+      .box { stroke: #b8c7d2; stroke-width: 1.5; rx: 22; filter: url(#shadow); }
+      .chip { fill: #ffffff; stroke: #c9d6df; stroke-width: 1.1; rx: 16; filter: url(#shadow); }
+      .arrow { stroke: #335166; stroke-width: 2.2; fill: none; marker-end: url(#arrow); }
+      .soft { stroke: #6b7f8f; stroke-width: 1.9; fill: none; marker-end: url(#arrow); stroke-dasharray: 7 7; }
+    </style>
+  </defs>
+
+  <rect width="1180" height="720" fill="url(#bg)"/>
+  <circle cx="105" cy="105" r="70" fill="#d5ecff" opacity=".5"/>
+  <circle cx="1030" cy="610" r="90" fill="#ffe7ad" opacity=".42"/>
+
+  <text x="60" y="62" class="title">Conversation Flows trong Rasa Backend</text>
+  <text x="60" y="91" class="subtitle">Message được phân loại thành flow phù hợp, sau đó Rasa trả response hoặc kích hoạt tìm kiếm tri thức.</text>
+
+  <!-- Input -->
+  <rect x="70" y="285" width="190" height="90" class="box" fill="#ffffff"/>
+  <text x="165" y="323" text-anchor="middle" class="label">User Message</text>
+  <text x="165" y="349" text-anchor="middle" class="small">Tin nhắn đầu vào</text>
+
+  <!-- Router -->
+  <rect x="360" y="250" width="260" height="160" class="box" fill="url(#decision)"/>
+  <text x="490" y="296" text-anchor="middle" class="label">Flow Router</text>
+  <text x="490" y="324" text-anchor="middle" class="small">Hiểu ý định người dùng</text>
+  <text x="490" y="348" text-anchor="middle" class="small">và chọn flow tiếp theo</text>
+  <text x="490" y="382" text-anchor="middle" class="tiny">FlowPolicy + RulePolicy</text>
+
+  <!-- Flow chips -->
+  <rect x="735" y="125" width="170" height="64" class="chip"/>
+  <text x="820" y="151" text-anchor="middle" class="label">Greet</text>
+  <text x="820" y="173" text-anchor="middle" class="tiny">Chào hỏi</text>
+
+  <rect x="735" y="215" width="170" height="64" class="chip"/>
+  <text x="820" y="241" text-anchor="middle" class="label">Ask Help</text>
+  <text x="820" y="263" text-anchor="middle" class="tiny">Giới thiệu khả năng</text>
+
+  <rect x="735" y="305" width="170" height="64" class="chip"/>
+  <text x="820" y="331" text-anchor="middle" class="label">Thanks</text>
+  <text x="820" y="353" text-anchor="middle" class="tiny">Phản hồi cảm ơn</text>
+
+  <rect x="735" y="395" width="170" height="64" class="chip"/>
+  <text x="820" y="421" text-anchor="middle" class="label">Goodbye</text>
+  <text x="820" y="443" text-anchor="middle" class="tiny">Kết thúc hội thoại</text>
+
+  <rect x="735" y="485" width="170" height="64" class="chip"/>
+  <text x="820" y="511" text-anchor="middle" class="label">Chitchat</text>
+  <text x="820" y="533" text-anchor="middle" class="tiny">Trò chuyện ngắn</text>
+
+  <rect x="735" y="575" width="170" height="64" class="chip" fill="url(#search)"/>
+  <text x="820" y="601" text-anchor="middle" class="label">Knowledge</text>
+  <text x="820" y="623" text-anchor="middle" class="tiny">Câu hỏi factual</text>
+
+  <!-- Search action -->
+  <rect x="975" y="560" width="150" height="92" class="box" fill="url(#search)"/>
+  <text x="1050" y="594" text-anchor="middle" class="label">Search</text>
+  <text x="1050" y="620" text-anchor="middle" class="small">Tra cứu tri thức</text>
+  <text x="1050" y="641" text-anchor="middle" class="tiny">Grounded answer</text>
+
+  <!-- Response -->
+  <rect x="975" y="272" width="150" height="112" class="box" fill="#ffffff"/>
+  <text x="1050" y="313" text-anchor="middle" class="label">Response</text>
+  <text x="1050" y="340" text-anchor="middle" class="small">Trả lời người dùng</text>
+  <text x="1050" y="363" text-anchor="middle" class="tiny">Vietnamese text</text>
+
+  <!-- Fallback -->
+  <rect x="360" y="505" width="260" height="96" class="box" fill="#fffdf8"/>
+  <text x="490" y="542" text-anchor="middle" class="label">Fallback / Rephrase</text>
+  <text x="490" y="568" text-anchor="middle" class="small">Không hiểu hoặc thiếu thông tin</text>
+
+  <!-- Arrows -->
+  <path d="M 260 330 C 292 330, 322 330, 354 330" class="arrow"/>
+  <text x="307" y="313" text-anchor="middle" class="tiny">incoming</text>
+
+  <path d="M 620 294 C 660 222, 690 160, 728 157" class="arrow"/>
+  <path d="M 620 314 C 662 278, 693 249, 728 247" class="arrow"/>
+  <path d="M 620 334 C 662 336, 692 337, 728 337" class="arrow"/>
+  <path d="M 620 354 C 662 388, 693 425, 728 427" class="arrow"/>
+  <path d="M 620 374 C 660 456, 692 516, 728 517" class="arrow"/>
+  <path d="M 602 410 C 650 508, 690 600, 728 607" class="arrow"/>
+
+  <path d="M 905 157 C 945 174, 984 226, 1018 270" class="soft"/>
+  <path d="M 905 247 C 932 255, 960 280, 970 306" class="soft"/>
+  <path d="M 905 337 C 930 337, 948 337, 968 337" class="soft"/>
+  <path d="M 905 427 C 943 414, 977 390, 1008 382" class="soft"/>
+  <path d="M 905 517 C 950 492, 1010 430, 1032 384" class="soft"/>
+
+  <path d="M 905 607 C 930 607, 947 607, 968 607" class="arrow"/>
+  <path d="M 1050 560 C 1050 500, 1050 438, 1050 391" class="soft"/>
+
+  <path d="M 490 410 C 490 440, 490 470, 490 498" class="soft"/>
+  <path d="M 620 553 C 725 553, 850 470, 975 356" class="soft"/>
+</svg>

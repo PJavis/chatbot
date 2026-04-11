@@ -1,0 +1,42 @@
+test_cases:
+  - test_case: user asks what they just asked
+    steps:
+      - user: Phạm Văn Đồng là ai?
+      - action: action_trigger_search
+      - user: tôi vừa hỏi bạn gì?
+      - action: action_trigger_search
+
+  - test_case: user asks about the current topic
+    steps:
+      - user: Vị trí địa lý của Pháp có gì đặc biệt?
+      - action: action_trigger_search
+      - user: chúng ta đang nói về chủ đề gì?
+      - action: action_trigger_search
+
+  - test_case: user asks contextual follow up with pronoun
+    steps:
+      - user: Phạm Văn Đồng là ai?
+      - action: action_trigger_search
+      - user: ông ấy giữ chức vụ gì?
+      - action: action_trigger_search
+
+  - test_case: user asks for more detail about previous topic
+    steps:
+      - user: Cuộc cách mạng Pháp diễn ra ở đâu?
+      - action: action_trigger_search
+      - user: nói rõ hơn về sự kiện đó
+      - action: action_trigger_search
+
+  - test_case: user switches topic after a previous question
+    steps:
+      - user: Phạm Văn Đồng là ai?
+      - action: action_trigger_search
+      - user: không, tôi hỏi về California
+      - action: action_trigger_search
+
+  - test_case: user asks to repeat previous answer
+    steps:
+      - user: Khẩu hiệu của Wikipedia là gì?
+      - action: action_trigger_search
+      - user: nhắc lại câu trả lời vừa rồi
+      - action: action_trigger_search

@@ -24,6 +24,20 @@ stories:
       - intent: ask_knowledge
       - action: action_trigger_search
 
+  - story: user asks about previous question
+    steps:
+      - intent: ask_knowledge
+      - action: action_trigger_search
+      - intent: ask_conversation_history
+      - action: action_trigger_search
+
+  - story: user asks contextual follow up after factual answer
+    steps:
+      - intent: ask_knowledge
+      - action: action_trigger_search
+      - intent: ask_knowledge
+      - action: action_trigger_search
+
   - story: social small talk then move into knowledge search
     steps:
       - intent: chitchat

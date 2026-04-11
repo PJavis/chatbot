@@ -24,6 +24,8 @@ services:
     image: chatbot-ui
     ports:
       - "7860:7860"
+    env_file:
+      - ./rasa_app/.env
     restart: unless-stopped
     depends_on:
       - rasa
@@ -31,6 +33,11 @@ services:
       - RASA_REST_URL=http://rasa:5005/webhooks/rest/webhook
       - RASA_CHAT_SENDER=gradio_user
       - RASA_API_TIMEOUT=75
+      - ENABLE_TAVILY_FALLBACK=${ENABLE_TAVILY_FALLBACK:-1}
+      - TAVILY_MAX_RESULTS=${TAVILY_MAX_RESULTS:-3}
+      - TAVILY_SEARCH_DEPTH=${TAVILY_SEARCH_DEPTH:-basic}
+      - TAVILY_INCLUDE_ANSWER=${TAVILY_INCLUDE_ANSWER:-advanced}
+      - TAVILY_TIMEOUT=${TAVILY_TIMEOUT:-20}
       - UI_PORT=7860
       - RASA_DATA_SOURCE=/data/processed
       - RASA_KB_DIR=/app/docs

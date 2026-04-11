@@ -13,6 +13,7 @@ intents:
   - goodbye
   - chitchat
   - ask_knowledge
+  - ask_conversation_history
   - ask_out_of_scope
 
 responses:

@@ -38,6 +38,9 @@ Analyze the conversation context and generate a list of actions: start flows, se
 * Only use information provided by the user and conversation context.
 * If the message is a greeting, help request, gratitude, goodbye, or casual chat, start the matching social flow.
 * If the message is a factual question that should be answered from the knowledge corpus, return `search and reply`.
+* If the message asks about the current conversation history, such as what the user just asked, what the bot just answered, what topic has been discussed, a summary of the chat, a repeat of a previous answer, or a list of previous questions or answers, return `search and reply` so the search policy can answer from conversation context.
+* If the message is a contextual follow-up that depends on prior turns, such as `ông ấy là ai`, `nói rõ hơn`, `còn gì nữa`, `vì sao`, `khi nào`, `ở đâu`, `so sánh với người đó`, `tiếp tục`, `giải thích ý đó`, or references like `người này`, `sự kiện đó`, `câu trả lời trên`, return `search and reply`.
+* If the message corrects or changes the subject, such as `ý tôi là...`, `không, tôi hỏi về...`, `đổi sang...`, or `bỏ qua câu trước`, return `search and reply`.
 * If the message is unsupported, out of scope, or not grounded in the available flows, still return `search and reply` so the search policy can decide whether to answer or refuse.
 * Never invent a flow or slot when the message only asks for a fact, location, date, name, explanation, or other corpus-grounded detail.
 * When a user asks the same factual question again after a refusal or a partial answer, still return `search and reply` rather than trying to correct the answer yourself.

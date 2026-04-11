@@ -21,11 +21,18 @@ if str(ROOT) not in sys.path:
 
 from data import load_corpus, load_split
 from evaluation.metrics import bleu_score, evaluate_predictions, exact_match, token_f1
-from rasa_inference import call_rasa, format_response, generate_rasa_predictions, make_sender
+from rasa_inference import (
+    call_rasa,
+    call_rasa_with_tavily_fallback_and_intent,
+    format_response,
+    generate_rasa_predictions,
+    make_sender,
+)
 
 RASA_REST_URL = os.getenv("RASA_REST_URL", "http://localhost:5005/webhooks/rest/webhook")
 RASA_SENDER = os.getenv("RASA_CHAT_SENDER", "gradio_user")
 RASA_TIMEOUT = float(os.getenv("RASA_API_TIMEOUT", "30"))
+MAX_TRACE_CHARS = int(os.getenv("MAX_TRACE_CHARS", "700"))
 APP_CSS = """
 .gradio-container {
     max-width: 1180px !important;
@@ -69,7 +76,8 @@ def _load_data() -> None:
 def _fold_text(text: str) -> str:
     """Lowercase text and remove accents for tolerant search matching."""
     normalized = unicodedata.normalize("NFD", text.casefold())
-    return "".join(char for char in normalized if unicodedata.category(char) != "Mn")
+    folded = "".join(char for char in normalized if unicodedata.category(char) != "Mn")
+    return folded.replace("đ", "d")
 
 
 def _snippet(text: str, keyword: str, radius: int = 140) -> str:
@@ -299,15 +307,18 @@ def generate_predictions_file(examples_file, concurrency: int) -> tuple[str | No
     return str(output_path), status
 
 
-def _normalize_history(history: list[object] | None) -> list[dict[str, str]]:
+def _normalize_history(history: list[object] | None) -> list[dict[str, object]]:
     """Convert any prior chatbot state into role/content messages."""
-    normalized: list[dict[str, str]] = []
+    normalized: list[dict[str, object]] = []
     for item in history or []:
         if isinstance(item, dict):
             role = item.get("role")
             content = item.get("content")
             if role in {"user", "assistant"} and isinstance(content, str):
-                normalized.append({"role": role, "content": content})
+                message = {"role": role, "content": content}
+                if isinstance(item.get("metadata"), dict):
+                    message["metadata"] = item["metadata"]
+                normalized.append(message)
             continue
 
         if isinstance(item, (list, tuple)) and len(item) == 2:
@@ -320,23 +331,222 @@ def _normalize_history(history: list[object] | None) -> list[dict[str, str]]:
     return normalized
 
 
-def stream_response(message: str, history: list[object] | None, sender: str):
-    """Stream assistant text back to Gradio while preserving chat history."""
-    history = _normalize_history(history)
+def _extract_intent(response: list[dict]) -> dict[str, object] | None:
+    for segment in response:
+        metadata = segment.get("metadata") or {}
+        intent = metadata.get("intent")
+        if isinstance(intent, dict):
+            return intent
+    return None
+
+
+def _extract_backend_trace(response: list[dict]) -> dict[str, object]:
+    trace: dict[str, object] = {}
+    for segment in response:
+        metadata = segment.get("metadata") or {}
+        if not isinstance(metadata, dict):
+            continue
+        for key in ("rag_output", "tool_output", "source"):
+            if key in metadata and key not in trace:
+                trace[key] = metadata[key]
+    return trace
+
+
+def _normalized_user_text(text: str) -> str:
+    return _fold_text(text).strip()
+
+
+def _is_conversation_history_request(message: str) -> bool:
+    normalized = _normalized_user_text(message)
+    question_patterns = (
+        "toi da hoi",
+        "toi vua hoi",
+        "toi hoi nhung cau gi",
+        "toi da hoi nhung cau gi",
+        "toi da hoi nhung gi",
+        "cuoc tro chuyen nay toi da hoi",
+        "trong cuoc tro chuyen nay toi da hoi",
+        "nhung cau toi da hoi",
+        "cac cau toi da hoi",
+        "liet ke cac cau",
+        "liet ke nhung cau",
+        "danh sach cau hoi",
+        "cau hoi truoc",
+        "hoi nhung gi",
+        "hoi gi",
+    )
+    answer_patterns = (
+        "ban vua tra loi",
+        "ban da tra loi",
+        "cau tra loi truoc",
+        "nhac lai cau tra loi",
+        "lap lai cau tra loi",
+        "nhung gi ban da tra loi",
+    )
+    summary_patterns = (
+        "tom tat cuoc tro chuyen",
+        "tom tat hoi thoai",
+        "chung ta dang noi",
+        "chu de hien tai",
+        "noi ve chu de gi",
+    )
+    return any(pattern in normalized for pattern in question_patterns + answer_patterns + summary_patterns)
+
+
+def _prior_messages(memory: list[dict[str, object]], role: str) -> list[str]:
+    return [
+        str(item.get("content") or "").strip()
+        for item in memory
+        if item.get("role") == role and str(item.get("content") or "").strip()
+    ]
+
+
+def _prior_assistant_answers(memory: list[dict[str, object]]) -> list[str]:
+    answers = []
+    for item in memory:
+        if item.get("role") != "assistant":
+            continue
+        if isinstance(item.get("metadata"), dict):
+            continue
+        content = str(item.get("content") or "").strip()
+        if content:
+            answers.append(content)
+    return answers
+
+
+def _format_numbered(items: list[str]) -> str:
+    return "\n".join(f"{idx}. {item}" for idx, item in enumerate(items, start=1))
+
+
+def _answer_conversation_history(message: str, memory: list[dict[str, object]]) -> str:
+    normalized = _normalized_user_text(message)
+    user_questions = _prior_messages(memory, "user")
+    assistant_answers = _prior_assistant_answers(memory)
+
+    wants_summary = any(
+        pattern in normalized
+        for pattern in ("tom tat", "chung ta dang noi", "chu de hien tai", "noi ve chu de gi")
+    )
+    wants_answers = any(
+        pattern in normalized
+        for pattern in ("ban vua tra loi", "ban da tra loi", "cau tra loi", "nhac lai", "lap lai", "nhung gi ban da tra loi")
+    )
+    wants_list = any(
+        pattern in normalized
+        for pattern in ("nhung cau", "cac cau", "liet ke", "danh sach", "nhung gi")
+    )
+
+    if wants_summary:
+        if not user_questions:
+            return "Chưa có câu hỏi nào trước đó trong phiên trò chuyện này."
+        return "Trong phiên này, bạn đã hỏi:\n" + _format_numbered(user_questions)
+
+    if wants_answers and not wants_list:
+        if not assistant_answers:
+            return "Tôi chưa có câu trả lời trước đó trong phiên trò chuyện này."
+        return f"Câu trả lời gần nhất của tôi là:\n{assistant_answers[-1]}"
+
+    if wants_answers:
+        if not assistant_answers:
+            return "Tôi chưa có câu trả lời nào trước đó trong phiên trò chuyện này."
+        return "Các câu trả lời trước đó của tôi là:\n" + _format_numbered(assistant_answers)
+
+    if not user_questions:
+        return "Bạn chưa hỏi câu nào trước đó trong phiên trò chuyện này."
+    if "toi vua hoi" in normalized or "cau hoi truoc" in normalized:
+        return f"Bạn vừa hỏi: \"{user_questions[-1]}\"."
+    if wants_list or len(user_questions) > 1:
+        return "Trong phiên này, bạn đã hỏi:\n" + _format_numbered(user_questions)
+    return f"Bạn vừa hỏi: \"{user_questions[-1]}\"."
+
+
+def _truncate_trace(value: object, limit: int = MAX_TRACE_CHARS) -> str:
+    text = str(value or "").strip()
+    if len(text) <= limit:
+        return text
+    return f"{text[:limit].rstrip()}..."
+
+
+def _backend_tool_message(intent: dict[str, object] | None, trace: dict[str, object]) -> dict[str, object]:
+    if not intent:
+        intent_title = "unavailable"
+        intent_line = "Intent: unavailable"
+    else:
+        name = str(intent.get("name") or "unknown")
+        confidence = intent.get("confidence")
+        source = intent.get("source")
+        if isinstance(confidence, (int, float)):
+            intent_title = f"{name} ({confidence:.2f})"
+            intent_line = f"Intent: {name}\nConfidence: {confidence:.2f}"
+        else:
+            intent_title = name
+            intent_line = f"Intent: {name}"
+        if source:
+            intent_line = f"{intent_line}\nClassification source: {source}"
+
+    source = str(trace.get("source") or "rasa")
+    tool_output = trace.get("tool_output")
+    rag_output = trace.get("rag_output")
+    if tool_output:
+        tool_section = f"Tool/source: {source}\nTool output:\n{_truncate_trace(tool_output)}"
+    elif rag_output:
+        tool_section = f"Tool/source: rasa\nRAG diagnostic output:\n{_truncate_trace(rag_output)}"
+    else:
+        tool_section = f"Tool/source: {source}\nTool output: No external tool output."
+
+    content = f"{intent_line}\n\n{tool_section}"
+
+    return {
+        "role": "assistant",
+        "content": content,
+        "metadata": {"title": f"Backend trace: {intent_title}", "status": "done"},
+    }
+
+
+def stream_response(message: str, memory: list[object] | None, sender: str):
+    """Stream assistant text back to Gradio while preserving full chat memory."""
+    memory = _normalize_history(memory)
     if not message or not message.strip():
-        yield history, "", history, sender
+        yield memory, "", memory, sender
         return
 
     LOGGER.info("Sending message to Rasa: %s", message)
-    LOGGER.info("Current chatbot history before request: %s", history)
+    LOGGER.info("Current chatbot memory before request: %s", memory)
+
+    if _is_conversation_history_request(message):
+        assistant_text = _answer_conversation_history(message, memory)
+        memory.append({"role": "user", "content": message})
+        memory.append(
+            {
+                "role": "assistant",
+                "content": "Intent: ask_conversation_history\nClassification source: ui_memory\n\nTool/source: ui_memory\nTool output: Full in-session chat memory.",
+                "metadata": {"title": "Backend trace: ask_conversation_history", "status": "done"},
+            }
+        )
+        memory.append({"role": "assistant", "content": ""})
+        yield memory, "", memory, sender
+        streamed = ""
+        for word in assistant_text.split():
+            streamed = f"{streamed} {word}".strip()
+            memory[-1]["content"] = streamed
+            yield memory, "", memory, sender
+        if streamed != assistant_text:
+            memory[-1]["content"] = assistant_text
+            yield memory, "", memory, sender
+        return
 
     try:
-        rasa_payload = call_rasa(message, rasa_url=RASA_REST_URL, sender=sender, timeout=RASA_TIMEOUT)
+        rasa_payload = call_rasa_with_tavily_fallback_and_intent(
+            message,
+            rasa_url=RASA_REST_URL,
+            sender=sender,
+            timeout=RASA_TIMEOUT,
+        )
     except requests.RequestException as exc:
         LOGGER.exception("Rasa request failed for message: %s", message)
-        history.append({"role": "user", "content": message})
-        history.append({"role": "assistant", "content": f"Failed to reach Rasa: {exc}"})
-        yield history[:], "", history[:], sender
+        memory.append({"role": "user", "content": message})
+        memory.append({"role": "assistant", "content": f"Failed to reach Rasa: {exc}"})
+        yield memory, "", memory, sender
         return
 
     LOGGER.info(
@@ -344,19 +554,23 @@ def stream_response(message: str, history: list[object] | None, sender: str):
         json.dumps(rasa_payload, ensure_ascii=False),
     )
     assistant_text = format_response(rasa_payload)
+    intent = _extract_intent(rasa_payload)
+    trace = _extract_backend_trace(rasa_payload)
     LOGGER.info("Formatted assistant response: %s", assistant_text)
-    history.append({"role": "user", "content": message})
-    history.append({"role": "assistant", "content": ""})
+    memory.append({"role": "user", "content": message})
+    memory.append(_backend_tool_message(intent, trace))
+    memory.append({"role": "assistant", "content": ""})
+    yield memory, "", memory, sender
     streamed = ""
 
     for word in assistant_text.split():
         streamed = f"{streamed} {word}".strip()
-        history[-1]["content"] = streamed
-        yield history[:], "", history[:], sender
+        memory[-1]["content"] = streamed
+        yield memory, "", memory, sender
 
     if streamed != assistant_text:
-        history[-1]["content"] = assistant_text
-        yield history[:], "", history[:], sender
+        memory[-1]["content"] = assistant_text
+        yield memory, "", memory, sender
 
 
 def new_conversation():
@@ -477,13 +691,15 @@ def build_app() -> gr.Blocks:
             with gr.Tab("Chat với Rasa"):
                 gr.Markdown(
                     "### Gửi tin nhắn đến Rasa REST channel\n"
-                    "Tab này forward trực tiếp message đến `RASA_REST_URL` và stream câu trả lời theo từng từ."
+                    "Tab này forward trực tiếp message đến `RASA_REST_URL` và stream câu trả lời theo từng từ.\n"
+                    "Cuộc trò chuyện giữ toàn bộ memory trong phiên hiện tại."
                 )
                 chat_history = gr.State([])
                 sender_state = gr.State(_new_sender())
                 chatbot = gr.Chatbot(
                     elem_id="rasa-chatbot",
                     height=520,
+                    group_consecutive_messages=False,
                 )
                 with gr.Row():
                     message_input = gr.Textbox(

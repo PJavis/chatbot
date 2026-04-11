@@ -76,6 +76,36 @@ nlu:
       - Giá nhân công cao khiến Puerto Rico đương đầu với thách thức nào?
       - Vì sao các ưu thế trong công nghệ quân sự của liên minh không được phát huy tốt khi chiến đấu nội thành?
       - Đại tá French đã sử dụng phương pháp liên lạc nào thay cho hệ thống liên lạc vô tuyến của Bộ Chiến tranh Hoa Kỳ với Honolulu?
+      - ông ấy giữ chức vụ gì?
+      - người đó là ai?
+      - sự kiện đó diễn ra khi nào?
+      - nói rõ hơn về người vừa nhắc đến
+      - còn thông tin gì về chủ đề đó?
+      - vì sao điều đó xảy ra?
+      - so sánh với người vừa nhắc đến
+      - giải thích ý đó rõ hơn
+      - tiếp tục câu trả lời trước
+      - không, tôi hỏi về California
+      - ý tôi là Phạm Văn Đồng
+      - bỏ qua câu trước, hãy nói về Pháp
+
+  - intent: ask_conversation_history
+    examples: |
+      - tôi vừa hỏi bạn gì?
+      - câu hỏi trước của tôi là gì?
+      - tôi đã hỏi gì lúc nãy?
+      - bạn vừa trả lời gì?
+      - câu trả lời trước của bạn là gì?
+      - nhắc lại câu trả lời vừa rồi
+      - lặp lại câu trả lời trước
+      - chúng ta đang nói về chủ đề gì?
+      - tóm tắt cuộc trò chuyện này
+      - liệt kê các câu tôi đã hỏi
+      - liệt kê những gì bạn đã trả lời
+      - chủ đề hiện tại là gì?
+      - trước đó tôi hỏi về ai?
+      - bạn có nhớ tôi vừa hỏi gì không?
+      - hãy nhắc lại nội dung vừa nói
 
   - intent: ask_out_of_scope
     examples: |
